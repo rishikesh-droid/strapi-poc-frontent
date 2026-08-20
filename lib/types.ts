@@ -82,6 +82,33 @@ export interface CaseStudy {
   updatedAt: string;
 }
 
+export interface Homepage {
+  heroEyebrow?: string | null;
+  heroTitle?: string | null;
+  heroHighlight?: string | null;
+  heroSubtitle?: string | null;
+  heroCtaPrimary?: string | null;
+  heroCtaSecondary?: string | null;
+  servicesEyebrow?: string | null;
+  servicesTitle?: string | null;
+  servicesSubtitle?: string | null;
+  workEyebrow?: string | null;
+  workTitle?: string | null;
+  blogEyebrow?: string | null;
+  blogTitle?: string | null;
+  ctaTitle?: string | null;
+  ctaSubtitle?: string | null;
+  ctaButton?: string | null;
+}
+
+export interface ContactPage {
+  eyebrow?: string | null;
+  title?: string | null;
+  subtitle?: string | null;
+  email?: string | null;
+  phone?: string | null;
+}
+
 export interface StrapiPagination {
   page: number;
   pageSize: number;

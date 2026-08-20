@@ -5,7 +5,13 @@ import BlogGrid from "./BlogGrid";
 import Reveal from "./Reveal";
 
 /** Homepage section: latest 3 articles fetched from Strapi. */
-export default async function BlogPreview() {
+export default async function BlogPreview({
+  eyebrow = "From the blog",
+  title = "Latest insights & ideas",
+}: {
+  eyebrow?: string | null;
+  title?: string | null;
+}) {
   const articles = await getLatestArticles(3);
 
   return (
@@ -14,10 +20,10 @@ export default async function BlogPreview() {
         <Reveal className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-widest text-accent-2">
-              From the blog
+              {eyebrow}
             </p>
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-              Latest insights &amp; ideas
+              {title}
             </h2>
           </div>
           <Link

@@ -1,6 +1,8 @@
 import type {
   Article,
   CaseStudy,
+  ContactPage,
+  Homepage,
   StrapiMedia,
   StrapiPagination,
   StrapiResponse,
@@ -140,6 +142,30 @@ export async function getCaseStudyBySlug(slug: string): Promise<CaseStudy | null
       "&populate[content][populate]=*",
   );
   return res.data?.[0] ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Page single types (editable text — design stays in code)
+// ---------------------------------------------------------------------------
+
+/** Homepage text (single type). Returns null if unavailable → components use defaults. */
+export async function getHomepage(): Promise<Homepage | null> {
+  try {
+    const res = await strapiFetch<StrapiResponse<Homepage>>(`/homepage`);
+    return res.data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Contact page text (single type). */
+export async function getContactPage(): Promise<ContactPage | null> {
+  try {
+    const res = await strapiFetch<StrapiResponse<ContactPage>>(`/contact-page`);
+    return res.data ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** Other case studies for the "more work" section. */

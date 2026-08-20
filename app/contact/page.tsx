@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Container from "@/components/Container";
 import Reveal from "@/components/Reveal";
+import { getContactPage } from "@/lib/strapi";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -10,7 +11,16 @@ export const metadata: Metadata = {
 const inputClass =
   "mt-2 w-full rounded-xl border border-line bg-base px-4 py-3 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-accent/60";
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const page = await getContactPage();
+  const eyebrow = page?.eyebrow || "Contact";
+  const title = page?.title || "Let's build something great";
+  const subtitle =
+    page?.subtitle ||
+    "Tell us about your project and we'll get back to you within one business day.";
+  const email = page?.email || "studio@webster.co.in";
+  const phone = page?.phone || "+91 00000 00000";
+
   return (
     <section className="relative overflow-hidden py-24">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -20,25 +30,24 @@ export default function ContactPage() {
         <div className="grid gap-12 lg:grid-cols-2">
           <Reveal>
             <p className="text-sm font-semibold uppercase tracking-widest text-accent-2">
-              Contact
+              {eyebrow}
             </p>
             <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-              Let&apos;s build something great
+              {title}
             </h1>
             <p className="mt-4 max-w-md text-lg leading-8 text-muted">
-              Tell us about your project and we&apos;ll get back to you within one
-              business day.
+              {subtitle}
             </p>
 
             <div className="mt-10 space-y-4 text-sm">
               <p className="text-muted">
                 Email:{" "}
-                <a href="mailto:studio@webster.co.in" className="font-medium text-ink">
-                  studio@webster.co.in
+                <a href={`mailto:${email}`} className="font-medium text-ink">
+                  {email}
                 </a>
               </p>
               <p className="text-muted">
-                Phone: <span className="font-medium text-ink">+91 00000 00000</span>
+                Phone: <span className="font-medium text-ink">{phone}</span>
               </p>
             </div>
           </Reveal>

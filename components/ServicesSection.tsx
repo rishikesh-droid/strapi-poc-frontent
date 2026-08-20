@@ -24,21 +24,26 @@ const SERVICES: Service[] = [
   { index: "04", title: "Technology", description: "Headless CMS, APIs and cloud infrastructure that scale cleanly as you grow.", icon: icons.chip },
 ];
 
-export default function ServicesSection() {
+export default function ServicesSection({
+  eyebrow = "What we do",
+  title = "Services built for modern brands",
+  subtitle = "A full-service studio covering everything from the first sketch to the final deploy.",
+}: {
+  eyebrow?: string | null;
+  title?: string | null;
+  subtitle?: string | null;
+}) {
   return (
     <section id="services" className="py-24">
       <Container>
         <Reveal className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-widest text-accent-2">
-            What we do
+            {eyebrow}
           </p>
           <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-            Services built for modern brands
+            {title}
           </h2>
-          <p className="mt-4 text-lg leading-8 text-muted">
-            A full-service studio covering everything from the first sketch to the
-            final deploy.
-          </p>
+          <p className="mt-4 text-lg leading-8 text-muted">{subtitle}</p>
         </Reveal>
 
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

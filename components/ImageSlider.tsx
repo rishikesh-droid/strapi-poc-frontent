@@ -17,7 +17,13 @@ const SLIDES: Slide[] = [
   { title: "SaaS Dashboard", tag: "UI/UX · Data", gradient: "from-fuchsia-500 via-violet-600 to-indigo-700" },
 ];
 
-export default function ImageSlider() {
+export default function ImageSlider({
+  eyebrow = "Selected work",
+  title = "Projects we're proud of",
+}: {
+  eyebrow?: string | null;
+  title?: string | null;
+}) {
   const [index, setIndex] = useState(0);
 
   const next = useCallback(() => setIndex((i) => (i + 1) % SLIDES.length), []);
@@ -34,10 +40,10 @@ export default function ImageSlider() {
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-widest text-accent-2">
-              Selected work
+              {eyebrow}
             </p>
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-              Projects we&apos;re proud of
+              {title}
             </h2>
           </div>
           <div className="flex gap-3">

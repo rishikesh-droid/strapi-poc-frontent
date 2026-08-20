@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Container from "./Container";
+import type { Homepage } from "@/lib/types";
 
 const MARQUEE = [
   "Web Development",
@@ -10,7 +11,25 @@ const MARQUEE = [
   "Motion Design",
 ];
 
-export default function Hero() {
+// Fallback copy — used when the Strapi Homepage single type has no value.
+const D = {
+  eyebrow: "Technology & Design Studio — since 2016",
+  title: "We design & engineer",
+  highlight: "premium digital products.",
+  subtitle:
+    "A studio for ambitious brands — strategy, design and technology, brought together into experiences that feel effortless.",
+  ctaPrimary: "Start a project",
+  ctaSecondary: "View our work",
+};
+
+export default function Hero({ content }: { content?: Homepage | null }) {
+  const eyebrow = content?.heroEyebrow || D.eyebrow;
+  const title = content?.heroTitle || D.title;
+  const highlight = content?.heroHighlight || D.highlight;
+  const subtitle = content?.heroSubtitle || D.subtitle;
+  const ctaPrimary = content?.heroCtaPrimary || D.ctaPrimary;
+  const ctaSecondary = content?.heroCtaSecondary || D.ctaSecondary;
+
   return (
     <section className="relative overflow-hidden">
       {/* ambient background */}
@@ -37,7 +56,7 @@ export default function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
             </span>
-            Technology &amp; Design Studio — since 2016
+            {eyebrow}
           </span>
         </div>
 
@@ -84,25 +103,23 @@ export default function Hero() {
         {/* headline + copy */}
         <div className="relative z-10 mx-auto -mt-2 max-w-2xl text-center">
           <h1 className="anim-fade-up d3 font-display text-3xl font-semibold leading-[1.1] tracking-tight text-ink sm:text-5xl">
-            We design &amp; engineer{" "}
-            <span className="text-gradient">premium digital</span> products.
+            {title} <span className="text-gradient">{highlight}</span>
           </h1>
           <p className="anim-fade-up d4 mx-auto mt-5 max-w-md text-base leading-7 text-muted sm:text-lg">
-            A studio for ambitious brands — strategy, design and technology, brought
-            together into experiences that feel effortless.
+            {subtitle}
           </p>
           <div className="anim-fade-up d5 mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/contact"
               className="group relative overflow-hidden rounded-full bg-ink px-7 py-3 text-sm font-medium text-ink-inverse transition-transform hover:-translate-y-0.5"
             >
-              Start a project
+              {ctaPrimary}
             </Link>
             <Link
               href="/work"
               className="rounded-full border border-line-strong px-7 py-3 text-sm font-medium text-ink transition-colors hover:border-ink"
             >
-              View our work
+              {ctaSecondary}
             </Link>
           </div>
         </div>

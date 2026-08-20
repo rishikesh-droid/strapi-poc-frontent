@@ -2,7 +2,15 @@ import Link from "next/link";
 import Container from "./Container";
 import Reveal from "./Reveal";
 
-export default function CTASection() {
+export default function CTASection({
+  title = "Have a project in mind?",
+  subtitle = "Let's build something exceptional together. Tell us about your idea and we'll help bring it to life.",
+  button = "Let's talk",
+}: {
+  title?: string | null;
+  subtitle?: string | null;
+  button?: string | null;
+}) {
   return (
     <section className="py-24">
       <Container>
@@ -14,17 +22,16 @@ export default function CTASection() {
             </div>
             <div className="relative mx-auto max-w-2xl">
               <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
-                Have a project in mind?
+                {title}
               </h2>
               <p className="mx-auto mt-5 max-w-lg text-lg leading-8 text-muted">
-                Let&apos;s build something exceptional together. Tell us about your idea
-                and we&apos;ll help bring it to life.
+                {subtitle}
               </p>
               <Link
                 href="/contact"
                 className="mt-9 inline-block rounded-full bg-ink px-8 py-3.5 text-sm font-medium text-ink-inverse transition-transform hover:-translate-y-0.5"
               >
-                Let&apos;s talk →
+                {button} →
               </Link>
             </div>
           </div>
