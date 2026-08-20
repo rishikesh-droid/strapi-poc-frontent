@@ -12,11 +12,18 @@ const nextConfig: NextConfig = {
     // In production the Strapi host is public and this flag is a no-op.
     dangerouslyAllowLocalIP: isLocalHost,
     remotePatterns: [
+      // Strapi local uploads (fallback when Supabase Storage is off)
       {
         protocol: protocol.replace(":", "") as "http" | "https",
         hostname,
         port: port || undefined,
         pathname: "/uploads/**",
+      },
+      // Supabase Storage (where media lives in production)
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
       },
     ],
   },
