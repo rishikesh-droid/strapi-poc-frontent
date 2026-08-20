@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Container from "./Container";
 import type { Homepage } from "@/lib/types";
@@ -30,6 +33,31 @@ export default function Hero({ content }: { content?: Homepage | null }) {
   const ctaPrimary = content?.heroCtaPrimary || D.ctaPrimary;
   const ctaSecondary = content?.heroCtaSecondary || D.ctaSecondary;
 
+  // Cursor parallax: normalized offset from the stage center (-0.5 … 0.5).
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const [p, setP] = useState({ x: 0, y: 0 });
+
+  const onMove = (e: React.MouseEvent) => {
+    const el = stageRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setP({
+      x: (e.clientX - (r.left + r.width / 2)) / r.width,
+      y: (e.clientY - (r.top + r.height / 2)) / r.height,
+    });
+  };
+  const reset = () => setP({ x: 0, y: 0 });
+
+  // ball drifts toward cursor, wordmark drifts opposite (depth).
+  const ballStyle = {
+    transform: `translate3d(${p.x * 46}px, ${p.y * 34}px, 0)`,
+    transition: "transform 0.35s cubic-bezier(0.16,1,0.3,1)",
+  };
+  const wordmarkStyle = {
+    transform: `translate3d(${p.x * -22}px, ${p.y * -16}px, 0)`,
+    transition: "transform 0.45s cubic-bezier(0.16,1,0.3,1)",
+  };
+
   return (
     <section className="relative overflow-hidden">
       {/* ambient background */}
@@ -60,20 +88,22 @@ export default function Hero({ content }: { content?: Homepage | null }) {
           </span>
         </div>
 
-        {/* Depth stage: WEBSTER wordmark up top, sphere lowered to just overlap it */}
-        <div className="relative mt-8 flex flex-col items-center">
-          {/* wordmark (behind, fully visible) */}
+        {/* Depth stage: wordmark fills on hover, sphere follows the cursor */}
+        <div
+          ref={stageRef}
+          onMouseMove={onMove}
+          onMouseLeave={reset}
+          className="hero-stage relative mt-8 flex flex-col items-center"
+        >
+          {/* wordmark (behind) */}
           <span
             aria-hidden
+            style={wordmarkStyle}
             className="anim-fade-in d1 pointer-events-none relative z-0 select-none leading-none"
           >
             <span
-              className="font-display font-bold leading-none text-transparent"
-              style={{
-                fontSize: "clamp(4.5rem, 21vw, 19rem)",
-                WebkitTextStroke: "2px rgba(255,255,255,0.45)",
-                textShadow: "0 0 60px rgba(124,92,255,0.25)",
-              }}
+              className="hero-wordmark font-display font-bold leading-none"
+              style={{ fontSize: "clamp(4.5rem, 21vw, 19rem)" }}
             >
               Webster
             </span>
@@ -81,21 +111,23 @@ export default function Hero({ content }: { content?: Homepage | null }) {
 
           {/* the object (in front) — pulled up so only its top overlaps the text */}
           <div className="relative z-10 -mt-8 anim-scale-in d2 sm:-mt-14">
-            <div className="anim-float relative">
-              {/* glow */}
-              <div className="absolute inset-0 -z-10 scale-125 rounded-full bg-gradient-to-br from-accent-2/50 via-accent/40 to-accent-3/30 blur-3xl" />
-              {/* sphere */}
-              <div
-                className="h-56 w-56 rounded-full sm:h-72 sm:w-72"
-                style={{
-                  background:
-                    "radial-gradient(circle at 32% 28%, #ffffff 0%, #c7b8ff 12%, #7c5cff 38%, #3b2a8c 70%, #0c0a1f 100%)",
-                  boxShadow:
-                    "inset -30px -30px 60px rgba(0,0,0,0.55), inset 20px 20px 40px rgba(255,255,255,0.15), 0 40px 80px rgba(124,92,255,0.35)",
-                }}
-              />
-              {/* orbit ring */}
-              <div className="absolute inset-[-14%] -z-[5] rounded-full border border-line-strong/60" />
+            <div style={ballStyle}>
+              <div className="anim-float relative">
+                {/* glow */}
+                <div className="absolute inset-0 -z-10 scale-125 rounded-full bg-gradient-to-br from-accent-2/50 via-accent/40 to-accent-3/30 blur-3xl" />
+                {/* sphere */}
+                <div
+                  className="h-56 w-56 rounded-full sm:h-72 sm:w-72"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 32% 28%, #ffffff 0%, #c7b8ff 12%, #7c5cff 38%, #3b2a8c 70%, #0c0a1f 100%)",
+                    boxShadow:
+                      "inset -30px -30px 60px rgba(0,0,0,0.55), inset 20px 20px 40px rgba(255,255,255,0.15), 0 40px 80px rgba(124,92,255,0.35)",
+                  }}
+                />
+                {/* orbit ring */}
+                <div className="absolute inset-[-14%] -z-[5] rounded-full border border-line-strong/60" />
+              </div>
             </div>
           </div>
         </div>

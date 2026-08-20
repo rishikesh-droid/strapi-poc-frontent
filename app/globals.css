@@ -155,6 +155,41 @@ body {
 }
 
 /* ================================================================== */
+/* Hero wordmark: outline by default, fills with gradient on hover     */
+/* ================================================================== */
+@property --wm-fill {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.hero-wordmark {
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.42);
+  background-image: linear-gradient(
+    90deg,
+    var(--color-accent-2),
+    var(--color-accent) var(--wm-fill),
+    transparent var(--wm-fill)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 0 60px rgba(124, 92, 255, 0.25);
+  transition: --wm-fill 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* fill sweeps in when the hero stage is hovered */
+.hero-stage:hover .hero-wordmark {
+  --wm-fill: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-wordmark {
+    transition: none;
+  }
+}
+
+/* ================================================================== */
 /* Article / rich text body (dark)                                     */
 /* ================================================================== */
 .prose-article {
