@@ -14,20 +14,26 @@ const STRAPI_URL =
   process.env.NEXT_PUBLIC_STRAPI_URL ??
   "http://localhost:1337";
 
-// How long (seconds) a fetched Strapi response is served from Next's Data
-// Cache before being revalidated in the background. Pages then render from
-// cache — instant, like the static pages — instead of doing a live round-trip
-// on every visit. A published edit in Strapi appears within this window.
-const REVALIDATE_SECONDS = 60;
+// Cache tags let a Strapi publish webhook purge exactly the affected data
+// (see app/api/revalidate). A long time-based revalidate is kept only as a
+// safety net if the webhook ever fails.
+export const TAGS = {
+  articles: "articles",
+  caseStudies: "case-studies",
+  homepage: "homepage",
+  contactPage: "contact-page",
+} as const;
+
+const REVALIDATE_FALLBACK_SECONDS = 3600; // 1h safety net; webhook handles instant
 
 /**
  * Low-level fetch against the Strapi REST API.
- * Uses time-based ISR: responses are edge/data-cached for REVALIDATE_SECONDS,
- * so blog/work pages load instantly and only refresh from Strapi periodically.
+ * Responses are edge/data-cached and tagged, so pages load instantly and a
+ * Strapi publish can purge the exact tag on-demand for near-instant updates.
  */
-async function strapiFetch<T>(path: string): Promise<T> {
+async function strapiFetch<T>(path: string, tags: string[] = []): Promise<T> {
   const res = await fetch(`${STRAPI_URL}/api${path}`, {
-    next: { revalidate: REVALIDATE_SECONDS },
+    next: { revalidate: REVALIDATE_FALLBACK_SECONDS, tags },
     headers: { "Content-Type": "application/json" },
   });
 
@@ -58,6 +64,7 @@ export async function getLatestArticles(limit = 3): Promise<Article[]> {
   try {
     const res = await strapiFetch<StrapiResponse<Article[]>>(
       `/articles?${LIST_QUERY}&sort=publishedAt:desc&pagination[pageSize]=${limit}&pagination[page]=1`,
+      [TAGS.articles],
     );
     return res.data ?? [];
   } catch {
@@ -74,6 +81,7 @@ export async function getArticles(
 ): Promise<{ articles: Article[]; pagination?: StrapiPagination }> {
   const res = await strapiFetch<StrapiResponse<Article[]>>(
     `/articles?${LIST_QUERY}&sort=publishedAt:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`,
+    [TAGS.articles],
   );
   return { articles: res.data ?? [], pagination: res.meta?.pagination };
 }
@@ -91,7 +99,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     "&populate[author][populate][avatar]=true" +
     "&populate[blocks][populate]=*";
 
-  const res = await strapiFetch<StrapiResponse<Article[]>>(query);
+  const res = await strapiFetch<StrapiResponse<Article[]>>(query, [TAGS.articles]);
   return res.data?.[0] ?? null;
 }
 
@@ -104,6 +112,7 @@ export async function getRelatedArticles(
     `/articles?${LIST_QUERY}` +
       `&filters[slug][$ne]=${encodeURIComponent(excludeSlug)}` +
       `&sort=publishedAt:desc&pagination[pageSize]=${limit}`,
+    [TAGS.articles],
   );
   return res.data ?? [];
 }
@@ -124,6 +133,7 @@ export async function getCaseStudies(): Promise<CaseStudy[]> {
   try {
     const res = await strapiFetch<StrapiResponse<CaseStudy[]>>(
       `/case-studies?${CASE_STUDY_LIST_QUERY}&sort=publishedAt:desc&pagination[pageSize]=50`,
+      [TAGS.caseStudies],
     );
     return res.data ?? [];
   } catch {
@@ -140,6 +150,7 @@ export async function getCaseStudyBySlug(slug: string): Promise<CaseStudy | null
       "&populate[coverImage]=true" +
       "&populate[stats]=true" +
       "&populate[content][populate]=*",
+    [TAGS.caseStudies],
   );
   return res.data?.[0] ?? null;
 }
@@ -151,7 +162,7 @@ export async function getCaseStudyBySlug(slug: string): Promise<CaseStudy | null
 /** Homepage text (single type). Returns null if unavailable → components use defaults. */
 export async function getHomepage(): Promise<Homepage | null> {
   try {
-    const res = await strapiFetch<StrapiResponse<Homepage>>(`/homepage`);
+    const res = await strapiFetch<StrapiResponse<Homepage>>(`/homepage`, [TAGS.homepage]);
     return res.data ?? null;
   } catch {
     return null;
@@ -161,7 +172,7 @@ export async function getHomepage(): Promise<Homepage | null> {
 /** Contact page text (single type). */
 export async function getContactPage(): Promise<ContactPage | null> {
   try {
-    const res = await strapiFetch<StrapiResponse<ContactPage>>(`/contact-page`);
+    const res = await strapiFetch<StrapiResponse<ContactPage>>(`/contact-page`, [TAGS.contactPage]);
     return res.data ?? null;
   } catch {
     return null;
@@ -177,6 +188,7 @@ export async function getRelatedCaseStudies(
     `/case-studies?${CASE_STUDY_LIST_QUERY}` +
       `&filters[slug][$ne]=${encodeURIComponent(excludeSlug)}` +
       `&sort=publishedAt:desc&pagination[pageSize]=${limit}`,
+    [TAGS.caseStudies],
   );
   return res.data ?? [];
 }
