@@ -12,15 +12,20 @@ const STRAPI_URL =
   process.env.NEXT_PUBLIC_STRAPI_URL ??
   "http://localhost:1337";
 
+// How long (seconds) a fetched Strapi response is served from Next's Data
+// Cache before being revalidated in the background. Pages then render from
+// cache — instant, like the static pages — instead of doing a live round-trip
+// on every visit. A published edit in Strapi appears within this window.
+const REVALIDATE_SECONDS = 60;
+
 /**
  * Low-level fetch against the Strapi REST API.
- * `cache: "no-store"` keeps the POC always-fresh: edit & publish in Strapi,
- * refresh the frontend, see the change immediately. Swap for
- * `next: { revalidate: 60 }` in production for better performance.
+ * Uses time-based ISR: responses are edge/data-cached for REVALIDATE_SECONDS,
+ * so blog/work pages load instantly and only refresh from Strapi periodically.
  */
 async function strapiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${STRAPI_URL}/api${path}`, {
-    cache: "no-store",
+    next: { revalidate: REVALIDATE_SECONDS },
     headers: { "Content-Type": "application/json" },
   });
 
@@ -48,10 +53,16 @@ const LIST_QUERY =
 
 /** Latest N published articles — used by the homepage preview. */
 export async function getLatestArticles(limit = 3): Promise<Article[]> {
-  const res = await strapiFetch<StrapiResponse<Article[]>>(
-    `/articles?${LIST_QUERY}&sort=publishedAt:desc&pagination[pageSize]=${limit}&pagination[page]=1`,
-  );
-  return res.data ?? [];
+  try {
+    const res = await strapiFetch<StrapiResponse<Article[]>>(
+      `/articles?${LIST_QUERY}&sort=publishedAt:desc&pagination[pageSize]=${limit}&pagination[page]=1`,
+    );
+    return res.data ?? [];
+  } catch {
+    // Don't fail the build if Strapi is momentarily unreachable (e.g. Render
+    // free tier waking up). The page revalidates and refills on next request.
+    return [];
+  }
 }
 
 /** Paginated list of published articles — used by /blog. */
@@ -108,10 +119,15 @@ const CASE_STUDY_LIST_QUERY =
 
 /** All published case studies for the /work listing. */
 export async function getCaseStudies(): Promise<CaseStudy[]> {
-  const res = await strapiFetch<StrapiResponse<CaseStudy[]>>(
-    `/case-studies?${CASE_STUDY_LIST_QUERY}&sort=publishedAt:desc&pagination[pageSize]=50`,
-  );
-  return res.data ?? [];
+  try {
+    const res = await strapiFetch<StrapiResponse<CaseStudy[]>>(
+      `/case-studies?${CASE_STUDY_LIST_QUERY}&sort=publishedAt:desc&pagination[pageSize]=50`,
+    );
+    return res.data ?? [];
+  } catch {
+    // Don't fail the build if Strapi is momentarily unreachable.
+    return [];
+  }
 }
 
 /** A single case study by slug, with every field and image populated. */
